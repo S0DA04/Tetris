@@ -1,8 +1,10 @@
 #창 구현을 위해 pygame 사용
 import pygame
+#랜덤적인 블럭 생성을 위해 사용
+import random
 
 #색상값을 미리 넣어 지정
-color = {'White':(225,225,225), 'Black':(0,0,0)}
+color = {'White':(225,225,225), 'Black':(0,0,0), 'Red':(255,0,0), 'Blue':(0,0,255), 'Green': (0,255,0), 'Yellow': (255,255,0),'Purple':(128,0,255), 'Mint':(0,255,191), 'Pink':(230,25,230) }
 
 # 테트리스 틀의 가로길이와 세로길이 지정
 Vertical= 600
@@ -25,7 +27,7 @@ clock = pygame.time.Clock()
 block_map = [[0]*10 for i in range(20)]
 
 #블럭색 지정을 위한 색 리스트
-Color_list = ["White", "red", "Blue", "Green", "Yellow", "Pink", "Mint"]
+Color_list = ["White", "Red", "Blue", "Green", "Yellow", "Purple", "Mint",'Pink']
 
 #블럭의 모양을 결정
 #Block_Shape[0] = L모양  Block_Shape[1] = _l모양  Block_Shape[2] = ㅏ 모양  Block_Shape[3] = z 모양 Block_Shape[4] = reverse z 모양 Block_Shape[5] = ㅁ 모양  Block_Shape[6] = ㅣ 모양
@@ -74,12 +76,31 @@ Block_Shape = [
                 ],
                 #ㅣ모양 블럭
                 [
-                 [[0,7,0,0],[0,7,0,0],[0,7,0,0][0,7,0,0]],
+                 [[0,7,0,0],[0,7,0,0],[0,7,0,0],[0,7,0,0]],
                  [[0,0,0,0],[7,7,7,7],[0,0,0,0],[0,0,0,0]],
                  [[0,0,7,0],[0,0,7,0],[0,0,7,0],[0,0,7,0]],
                  [[0,0,0,0],[0,0,0,0],[7,7,7,7],[0,0,0,0]]
                 ]
                ]
+
+#블럭을 그리는 코드  Shape_Num 은 블럭의 모양 결정 Rotate는 회전한 모양 결정 x,y는 3*3블럭 혹은 4*4 의 그리드에서 가장 좌측 상단의 칸의 좌측 상단의 좌표를 지정하는 코드이다.
+def Draw_Block(Shape_Num,Rotate, x,y):
+    #ㅣ모양 블럭 생성 얘만 4*4라 따로 제작
+    if Shape_Num == 6:
+        for i in range(4):
+            for j in range(4):
+                if Block_Shape[6][Rotate][i][j] == 0:
+                    pass;
+                else:
+                    pygame.draw.rect(screen,color[Color_list[Block_Shape[6][Rotate][i][j]]],[x+(j*30),y+(i*30),30,30])
+    #나머지 블럭 생성 코드
+    else:
+        for i in range(3):
+            for j in range(3):
+                if Block_Shape[Shape_Num][Rotate][i][j] == 0:
+                    pass;
+                else:
+                    pygame.draw.rect(screen,color[Color_list[Block_Shape[Shape_Num][Rotate][i][j]]],[x+(j*30),y+(i*30),30,30])
 
 pygame.init()
 
@@ -97,6 +118,9 @@ while running:
     pygame.draw.aaline(screen, color['Black'], [frame_x,frame_y],[frame_x,frame_y+Vertical],True)
     pygame.draw.aaline(screen, color['Black'], [frame_x,frame_y+Vertical],[frame_x+Horizontal,frame_y+Vertical],True)
     pygame.draw.aaline(screen, color['Black'], [frame_x+Horizontal,frame_y+Vertical],[frame_x+Horizontal,frame_y],True)
+
+    #랜덤적으로 블럭을 하나 그린다. Shape_Num을 결정지음 
+    Draw_Block(random.randrange(0,7),0,150,50)
 
     #이벤트 수집
     pygame.display.update()
