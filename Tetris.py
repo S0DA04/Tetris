@@ -3,6 +3,9 @@ import pygame
 #랜덤적인 블럭 생성을 위해 사용
 import random
 
+from pygame import event
+from pygame.constants import K_w
+
 #색상값을 미리 넣어 지정
 color = {'White':(225,225,225), 'Black':(0,0,0), 'Red':(255,0,0), 'Blue':(0,0,255), 'Green': (0,255,0), 'Yellow': (255,255,0),'Purple':(128,0,255), 'Mint':(0,255,191), 'Pink':(230,25,230) }
 
@@ -85,6 +88,11 @@ Block_Shape = [
 
 #블럭을 그리는 코드  Shape_Num 은 블럭의 모양 결정 Rotate는 회전한 모양 결정 x,y는 3*3블럭 혹은 4*4 의 그리드에서 가장 좌측 상단의 칸의 좌측 상단의 좌표를 지정하는 코드이다.
 def Draw_Block(Shape_Num,Rotate, x,y):
+
+    #제일 왼쪽에 있는 블럭의 x좌푯값과 y좌푯값을 구하기
+    Max_Left = 500
+    Max_Right = 0
+
     #ㅣ모양 블럭 생성 얘만 4*4라 따로 제작
     if Shape_Num == 6:
         for i in range(4):
@@ -93,6 +101,10 @@ def Draw_Block(Shape_Num,Rotate, x,y):
                     pass;
                 else:
                     pygame.draw.rect(screen,color[Color_list[Block_Shape[6][Rotate][i][j]]],[x+(j*30),y+(i*30),30,30])
+                    if Max_Left > x+(j*30):
+                        Max_Left = x+(j*30)
+                    if Max_Right < x+(j*30)+30:
+                        Max_Right = x+(j*30)+30
     #나머지 블럭 생성 코드
     else:
         for i in range(3):
@@ -101,11 +113,34 @@ def Draw_Block(Shape_Num,Rotate, x,y):
                     pass;
                 else:
                     pygame.draw.rect(screen,color[Color_list[Block_Shape[Shape_Num][Rotate][i][j]]],[x+(j*30),y+(i*30),30,30])
+                    if Max_Left > x+(j*30):
+                        Max_Left = x+(j*30)
+                    if Max_Right < x+(j*30)+30:
+                        Max_Right = x+(j*30)+30
+    Wall = [Max_Left,Max_Right]
+    return Wall 
+
+
+def Random_Block():
+    randompick = random.randrange(0,7)
+    return randompick
 
 pygame.init()
 
+#임시용 블럭 랜덤 생성
+randompick = Random_Block()
+
 #반복문 수행
 running =True
+
+#로테이트값 초기화
+Rotation = 0
+
+#x,y값 초기화
+Placing_x = 150
+Placing_y = 50
+
+
 while running:
 
     #프레임 지정
@@ -120,11 +155,29 @@ while running:
     pygame.draw.aaline(screen, color['Black'], [frame_x+Horizontal,frame_y+Vertical],[frame_x+Horizontal,frame_y],True)
 
     #랜덤적으로 블럭을 하나 그린다. Shape_Num을 결정지음 
-    Draw_Block(random.randrange(0,7),0,150,50)
-
+    Wall = Draw_Block(randompick,0,Placing_x,Placing_y)
+    
+    Placing_y += 1
     #이벤트 수집
     pygame.display.update()
     for pyEvent in pygame.event.get():
+        #키가 눌렸을 때
+        if pyEvent.type == pygame.KEYUP:
+            #좌측화살표를 눌렀을 때
+            if pyEvent.key == pygame.K_LEFT:
+                #블럭이 칸을 넘어가는 것 방지
+                if Wall[0] > 30:
+                    Placing_x -= 30
+                else:
+                    pass
+            #오른쪽 키를 눌렀을 때
+            if pyEvent.key == pygame.K_RIGHT:
+                #블럭이 칸을 넘어가는 것 방지
+                if Wall[1] < 330:
+                    Placing_x += 30
+                else:
+                    pass
+        #종료버튼을 눌렀을 때
         if pyEvent.type == pygame.QUIT:
             running = False
         
