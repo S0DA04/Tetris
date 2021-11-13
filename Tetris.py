@@ -27,7 +27,26 @@ pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
 
 #배치된 블록을 확인하기 위하여 배열 생성
-block_map = [[0]*10 for i in range(20)]
+block_map = [[0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]]
 
 #블럭색 지정을 위한 색 리스트
 Color_list = ["White", "Red", "Blue", "Green", "Yellow", "Purple", "Mint",'Pink']
@@ -86,12 +105,25 @@ Block_Shape = [
                 ]
                ]
 
+def Draw_Block_Map(Block_Map):
+    x = 30
+    y = 50
+    for i in range(20):
+        for j in range(10):
+            if Block_Map[i][j] == 0:
+                pass
+            else:
+                pygame.draw.rect(screen,color[Color_list[Block_Map[i][j]]],[x+(j*30),y+(i*30),30,30])
+
+
+
 #블럭을 그리는 코드  Shape_Num 은 블럭의 모양 결정 Rotate는 회전한 모양 결정 x,y는 3*3블럭 혹은 4*4 의 그리드에서 가장 좌측 상단의 칸의 좌측 상단의 좌표를 지정하는 코드이다.
-def Draw_Block(Shape_Num,Rotate, x,y):
+def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
 
     #제일 왼쪽에 있는 블럭의 x좌푯값과 y좌푯값을 구하기
     Max_Left = 500
     Max_Right = 0
+    Max_Bottom = 0
 
     #ㅣ모양 블럭 생성 얘만 4*4라 따로 제작
     if Shape_Num == 6:
@@ -105,6 +137,26 @@ def Draw_Block(Shape_Num,Rotate, x,y):
                         Max_Left = x+(j*30)
                     if Max_Right < x+(j*30)+30:
                         Max_Right = x+(j*30)+30
+                    if Max_Bottom < y+(i*30)+30:
+                        Max_Bottom = y+(i*30)+30
+                    if Max_Bottom == 650:
+                        for k in range(4):
+                            for l in range(4):
+                                if Block_Shape[Shape_Num][Rotate][k][l] != 0:
+                                    block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
+                                else:
+                                    pass
+                        return "newa"     
+                    if Block_Shape[Shape_Num][Rotate][i][j] != 0:            
+                        if block_map[grid_y+1+i][grid_x+j] != 0:
+                            for k in range(4):
+                                for l in range(4):
+                                    if Block_Shape[Shape_Num][Rotate][k][l] != 0:
+                                        block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
+                                    else:
+                                        pass
+                            return "new"
+
     #나머지 블럭 생성 코드
     else:
         for i in range(3):
@@ -117,6 +169,26 @@ def Draw_Block(Shape_Num,Rotate, x,y):
                         Max_Left = x+(j*30)
                     if Max_Right < x+(j*30)+30:
                         Max_Right = x+(j*30)+30
+                    if Max_Bottom < y+(i*30)+30:
+                        Max_Bottom = y+(i*30)+30
+                    if Max_Bottom == 650:
+                        for k in range(3):
+                            for l in range(3):
+                                if Block_Shape[Shape_Num][Rotate][k][l] != 0:
+                                    block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
+                                else:
+                                    pass
+                        return "newa"
+                    if Block_Shape[Shape_Num][Rotate][i][j] != 0:
+                        if block_map[grid_y+1+i][grid_x+j] != 0:
+                            for k in range(3):
+                                for l in range(3):
+                                    if Block_Shape[Shape_Num][Rotate][k][l] != 0:
+                                        block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
+                                    else:
+                                        pass
+                            return "new"
+
     Wall = [Max_Left,Max_Right]
     return Wall 
 
@@ -140,6 +212,12 @@ Rotation = 0
 Placing_x = 150
 Placing_y = 50
 
+#시작할때의 배열속 위치
+x_Arr_ver = 4
+y_Arr_ver = 0
+
+#y그리드 갱신을 위해 사용
+flag = 80
 
 while running:
 
@@ -155,19 +233,54 @@ while running:
     pygame.draw.aaline(screen, color['Black'], [frame_x+Horizontal,frame_y+Vertical],[frame_x+Horizontal,frame_y],True)
 
     #랜덤적으로 블럭을 하나 그린다. Shape_Num을 결정지음 
-    Wall = Draw_Block(randompick,0,Placing_x,Placing_y)
+    Wall = Draw_Block(randompick,0,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
     
+    #1/30초당 1씩 블럭이 내려가도록 설정
     Placing_y += 1
+
+    #y의 그리드 갱신
+    if Placing_y >= flag:
+        y_Arr_ver += 1
+        flag += 30
+
+    #블럭이 다른 블럭에 닿으면 움직임을 멈추고 새로운 블럭 생성
+    if Wall == "new":
+        x_Arr_ver = 3
+        y_Arr_ver = 0
+        Placing_x = 150
+        Placing_y = 50
+        flag = 80
+        randompick = Random_Block()
+        Wall = Draw_Block(randompick,0,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
+
+    #블럭이 바닥에 닿게된다면 움직임을 멈추고 새로운 블럭 생성
+    if Wall == "newa":
+        x_Arr_ver = 3
+        y_Arr_ver = 0
+        Placing_x = 150
+        Placing_y = 50
+        flag = 80
+        randompick = Random_Block()
+        Wall = Draw_Block(randompick,0,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
+    
+    Draw_Block_Map(block_map)
+
     #이벤트 수집
     pygame.display.update()
     for pyEvent in pygame.event.get():
         #키가 눌렸을 때
         if pyEvent.type == pygame.KEYUP:
+            if pyEvent.key == pygame.K_DOWN:
+                Placing_y += 10
+                if Placing_y >= flag:
+                    y_Arr_ver += 1
+                    flag += 30
             #좌측화살표를 눌렀을 때
             if pyEvent.key == pygame.K_LEFT:
                 #블럭이 칸을 넘어가는 것 방지
                 if Wall[0] > 30:
                     Placing_x -= 30
+                    x_Arr_ver -= 1
                 else:
                     pass
             #오른쪽 키를 눌렀을 때
@@ -175,6 +288,7 @@ while running:
                 #블럭이 칸을 넘어가는 것 방지
                 if Wall[1] < 330:
                     Placing_x += 30
+                    x_Arr_ver += 1
                 else:
                     pass
         #종료버튼을 눌렀을 때
