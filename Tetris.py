@@ -3,9 +3,6 @@ import pygame
 #랜덤적인 블럭 생성을 위해 사용
 import random
 
-from pygame import event
-from pygame.constants import K_w
-
 #색상값을 미리 넣어 지정
 color = {'White':(225,225,225), 'Black':(0,0,0), 'Red':(255,0,0), 'Blue':(0,0,255), 'Green': (0,255,0), 'Yellow': (255,255,0),'Purple':(128,0,255), 'Mint':(0,255,191), 'Pink':(230,25,230) }
 
@@ -245,7 +242,7 @@ while running:
 
     #블럭이 다른 블럭에 닿으면 움직임을 멈추고 새로운 블럭 생성
     if Wall == "new":
-        x_Arr_ver = 3
+        x_Arr_ver = 4
         y_Arr_ver = 0
         Placing_x = 150
         Placing_y = 50
@@ -255,7 +252,7 @@ while running:
 
     #블럭이 바닥에 닿게된다면 움직임을 멈추고 새로운 블럭 생성
     if Wall == "newa":
-        x_Arr_ver = 3
+        x_Arr_ver = 4
         y_Arr_ver = 0
         Placing_x = 150
         Placing_y = 50
