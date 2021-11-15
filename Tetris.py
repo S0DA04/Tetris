@@ -102,6 +102,7 @@ Block_Shape = [
                 ]
                ]
 
+#블럭맵 안에 위치한 블럭을 표기한다 즉, 이미 바닥에 도달하였거나, 다른 블럭에 닿은 블럭을 그린다.
 def Draw_Block_Map(Block_Map):
     x = 30
     y = 50
@@ -130,6 +131,7 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                     pass;
                 else:
                     pygame.draw.rect(screen,color[Color_list[Block_Shape[6][Rotate][i][j]]],[x+(j*30),y+(i*30),30,30])
+                    #블럭에서의 최대 좌측 상단 하단 우측의 좌표를 뽑아내어 벽을 뚫고 나가는 일과 바닥에의 도착 게임 오버를 확인한다.
                     if Max_Left > x+(j*30):
                         Max_Left = x+(j*30)
                     if Max_Right < x+(j*30)+30:
@@ -143,6 +145,7 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                                     block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
                                 else:
                                     pass
+                        #newa는 바닥도달
                         return "newa"     
                     if Block_Shape[Shape_Num][Rotate][i][j] != 0:   
                         if grid_y+1+i <= 19:         
@@ -153,6 +156,7 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                                             block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
                                         else:
                                             pass
+                                #new 는 다른 블럭에 닿았을때
                                 return "new"
 
     #나머지 블럭 생성 코드
@@ -192,6 +196,8 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
     return Wall 
 
 
+#회전을 제어함 회전후에 블럭이 벽을 뚫는지 확인
+#LeftEr은 좌측벽을 뚫는거 Right----
 def Check_Rotation(Shape_Num,Rotate,x,y):
 
     Max_Left = 500
@@ -236,11 +242,12 @@ def Check_Rotation(Shape_Num,Rotate,x,y):
             return "BottomEr";
     return True;
 
-
+#렌던픽 바꾸는 용
 def Random_Block():
     randompick = random.randrange(0,7)
     return randompick
 
+#줄이 완성되었는 지 확인한다.
 def Check_Line(Block_map, Score):
     for i in range(20):
         for j in range(10):
@@ -256,12 +263,17 @@ def Check_Line(Block_map, Score):
                 break;
 
 
+#pygame 초기화
 pygame.init()
 
+#점수 초기화
 Score = 0
 
+#폰트 설정
 font_a = pygame.font.SysFont("arial", 50, False, False)
 font_b = pygame.font.SysFont("arial", 30, False, False)
+
+#text값 설정 (SCORE 문자 )
 text = font_a.render("score",True, "Black")
 
 
@@ -285,6 +297,7 @@ y_Arr_ver = 0
 #y그리드 갱신을 위해 사용
 flag = 80
 
+#실행
 while running:
 
     #프레임 지정
@@ -331,11 +344,15 @@ while running:
         randompick = Random_Block()
         Wall = Draw_Block(randompick,Rotation,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
     
+    #라인을 확인
     Check_Line(block_map, Score)
+    #라인 확인 이후에 맵을 그린다.
     Draw_Block_Map(block_map)
 
+    #갱신된 스코어 값을 반영한다.
     score = font_b.render(str(Score), True, "Black")
 
+    #갱신된 스코어와  SCORE문자를 출력한다.
     screen.blit(text,(460, 150))
     screen.blit(score,(495,200))
 
@@ -344,10 +361,12 @@ while running:
     for pyEvent in pygame.event.get():
         #키가 눌렸을 때
         if pyEvent.type == pygame.KEYUP:
+            #윗키가 눌리면 회전
             if pyEvent.key == pygame.K_UP:
                 RotCheck = Rotation + 1
                 if RotCheck == 4:
                     RotCheck =0 
+                #l자 모양의 블럭으로 인하여 두칸 미루는 경우때문에 while문 사용
                 while (Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) != True):
                     if Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) == "LeftEr":
                         x_Arr_ver += 1
@@ -358,12 +377,13 @@ while running:
                     elif Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) == "BottomEr":
                         y_Arr_ver -= 1
                         Placing_y -= 30
-
                 Rotation += 1
                 if Rotation == 4:
                     Rotation = 0
+            #아랫화살표가 눌렸을 때 초당 내려가능 양을 늘려 더 많이씩 내려가도록 설계
             if pyEvent.key == pygame.K_DOWN:
                 Placing_y += 10
+                #y 그리드 값 갱신 오류를 잡아주는 역할
                 if Placing_y >= flag:
                     y_Arr_ver += 1
                     flag += 30
