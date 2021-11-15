@@ -180,6 +180,7 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                                     block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
                                 else:
                                     pass
+                        #newa는 바닥도달
                         return "newa"
                     if Block_Shape[Shape_Num][Rotate][i][j] != 0:
                         if grid_y+1+i <= 19:
@@ -190,6 +191,7 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                                             block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
                                         else:
                                             pass
+                                #new 는 다른 블럭에 닿았을때
                                 return "new"
 
     Wall = [Max_Left,Max_Right]
@@ -256,12 +258,21 @@ def Check_Line(Block_map, Score):
                     for k in range(i,0,-1):
                         Block_map[k] = Block_map[k-1]
                     Score += 1
-                    Check_Line(Block_map, score);
+                    Score = Check_Line(Block_map, Score);
+                    return Score
                 else:
                     pass
             else: 
                 break;
+    return Score
 
+#천장에 도달했는지 판단 닿으면 게임 종료
+def Check_End(Block_map):
+    for i in range(10):
+        if Block_map[0][i] == 0:
+            pass
+        else:
+            return "End"
 
 #pygame 초기화
 pygame.init()
@@ -313,6 +324,10 @@ while running:
 
     #랜덤적으로 블럭을 하나 그린다. Shape_Num을 결정지음 
     Wall = Draw_Block(randompick,Rotation,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
+
+    #천장에 닿으면 reuuning을 종료
+    if Check_End(block_map) == "End":
+        running = False
     
     #1/30초당 1씩 블럭이 내려가도록 설정
     Placing_y += 1
@@ -343,9 +358,9 @@ while running:
         Rotation = 0
         randompick = Random_Block()
         Wall = Draw_Block(randompick,Rotation,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
-    
+
     #라인을 확인
-    Check_Line(block_map, Score)
+    Score = Check_Line(block_map, Score)
     #라인 확인 이후에 맵을 그린다.
     Draw_Block_Map(block_map)
 
@@ -354,7 +369,7 @@ while running:
 
     #갱신된 스코어와  SCORE문자를 출력한다.
     screen.blit(text,(460, 150))
-    screen.blit(score,(495,200))
+    screen.blit(score,(495,200)) 
 
     #이벤트 수집
     pygame.display.update()
@@ -383,7 +398,7 @@ while running:
             #아랫화살표가 눌렸을 때 초당 내려가능 양을 늘려 더 많이씩 내려가도록 설계
             if pyEvent.key == pygame.K_DOWN:
                 Placing_y += 10
-                #y 그리드 값 갱신 오류를 잡아주는 역할
+                #y 그리드 값 갱신 오류를 잡아주는
                 if Placing_y >= flag:
                     y_Arr_ver += 1
                     flag += 30
