@@ -144,15 +144,16 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                                 else:
                                     pass
                         return "newa"     
-                    if Block_Shape[Shape_Num][Rotate][i][j] != 0:            
-                        if block_map[grid_y+1+i][grid_x+j] != 0:
-                            for k in range(4):
-                                for l in range(4):
-                                    if Block_Shape[Shape_Num][Rotate][k][l] != 0:
-                                        block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
-                                    else:
-                                        pass
-                            return "new"
+                    if Block_Shape[Shape_Num][Rotate][i][j] != 0:   
+                        if grid_y+1+i <= 19:         
+                            if block_map[grid_y+1+i][grid_x+j] != 0:
+                                for k in range(4):
+                                    for l in range(4):
+                                        if Block_Shape[Shape_Num][Rotate][k][l] != 0:
+                                            block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
+                                        else:
+                                            pass
+                                return "new"
 
     #나머지 블럭 생성 코드
     else:
@@ -168,7 +169,7 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                         Max_Right = x+(j*30)+30
                     if Max_Bottom < y+(i*30)+30:
                         Max_Bottom = y+(i*30)+30
-                    if Max_Bottom == 650:
+                    if Max_Bottom >= 650:
                         for k in range(3):
                             for l in range(3):
                                 if Block_Shape[Shape_Num][Rotate][k][l] != 0:
@@ -177,24 +178,92 @@ def Draw_Block(Shape_Num,Rotate, grid_x, grid_y, x,y):
                                     pass
                         return "newa"
                     if Block_Shape[Shape_Num][Rotate][i][j] != 0:
-                        if block_map[grid_y+1+i][grid_x+j] != 0:
-                            for k in range(3):
-                                for l in range(3):
-                                    if Block_Shape[Shape_Num][Rotate][k][l] != 0:
-                                        block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
-                                    else:
-                                        pass
-                            return "new"
+                        if grid_y+1+i <= 19:
+                            if block_map[grid_y+i+1][grid_x+j] != 0:
+                                for k in range(3):
+                                    for l in range(3):
+                                        if Block_Shape[Shape_Num][Rotate][k][l] != 0:
+                                            block_map[grid_y+k][grid_x+l] = Block_Shape[Shape_Num][Rotate][k][l]
+                                        else:
+                                            pass
+                                return "new"
 
     Wall = [Max_Left,Max_Right]
     return Wall 
+
+
+def Check_Rotation(Shape_Num,Rotate,x,y):
+
+    Max_Left = 500
+    Max_Right = 0
+    Max_Bottom = 0
+
+    if Shape_Num == 6:
+        for i in range(4):
+            for j in range(4):
+                if Block_Shape[Shape_Num][Rotate][i][j] == 0:
+                    pass;
+                else:
+                    if Max_Left > x+(j*30):
+                        Max_Left = x+(j*30)
+                    if Max_Right < x+(j*30)+30:
+                        Max_Right = x+(j*30)+30
+                    if Max_Bottom < y+(i*30)+30:
+                        Max_Bottom = y+(i*30)+30
+        if Max_Left < 30:
+            return "LeftEr";
+        if Max_Right > 330:
+            return "RightEr";
+        if Max_Bottom > 650:
+            return "BottomEr";
+    else:
+        for i in range(3):
+            for j in range(3):
+                if Block_Shape[Shape_Num][Rotate][i][j] == 0:
+                    pass;
+                else:
+                    if Max_Left > x+(j*30):
+                        Max_Left = x+(j*30)
+                    if Max_Right < x+(j*30)+30:
+                        Max_Right = x+(j*30)+30
+                    if Max_Bottom < y+(i*30)+30:
+                        Max_Bottom = y+(i*30)+30
+        if Max_Left < 30:
+            return "LeftEr";
+        if Max_Right > 330:
+            return "RightEr";
+        if Max_Bottom > 650:
+            return "BottomEr";
+    return True;
 
 
 def Random_Block():
     randompick = random.randrange(0,7)
     return randompick
 
+def Check_Line(Block_map, Score):
+    for i in range(20):
+        for j in range(10):
+            if Block_map[i][j] != 0:
+                if j == 9:
+                    for k in range(i,0,-1):
+                        Block_map[k] = Block_map[k-1]
+                    Score += 1
+                    Check_Line(Block_map, score);
+                else:
+                    pass
+            else: 
+                break;
+
+
 pygame.init()
+
+Score = 0
+
+font_a = pygame.font.SysFont("arial", 50, False, False)
+font_b = pygame.font.SysFont("arial", 30, False, False)
+text = font_a.render("score",True, "Black")
+
 
 #임시용 블럭 랜덤 생성
 randompick = Random_Block()
@@ -230,7 +299,7 @@ while running:
     pygame.draw.aaline(screen, color['Black'], [frame_x+Horizontal,frame_y+Vertical],[frame_x+Horizontal,frame_y],True)
 
     #랜덤적으로 블럭을 하나 그린다. Shape_Num을 결정지음 
-    Wall = Draw_Block(randompick,0,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
+    Wall = Draw_Block(randompick,Rotation,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
     
     #1/30초당 1씩 블럭이 내려가도록 설정
     Placing_y += 1
@@ -247,8 +316,9 @@ while running:
         Placing_x = 150
         Placing_y = 50
         flag = 80
+        Rotation = 0
         randompick = Random_Block()
-        Wall = Draw_Block(randompick,0,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
+        Wall = Draw_Block(randompick,Rotation,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
 
     #블럭이 바닥에 닿게된다면 움직임을 멈추고 새로운 블럭 생성
     if Wall == "newa":
@@ -257,16 +327,41 @@ while running:
         Placing_x = 150
         Placing_y = 50
         flag = 80
+        Rotation = 0
         randompick = Random_Block()
-        Wall = Draw_Block(randompick,0,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
+        Wall = Draw_Block(randompick,Rotation,x_Arr_ver,y_Arr_ver,Placing_x,Placing_y)
     
+    Check_Line(block_map, Score)
     Draw_Block_Map(block_map)
+
+    score = font_b.render(str(Score), True, "Black")
+
+    screen.blit(text,(460, 150))
+    screen.blit(score,(495,200))
 
     #이벤트 수집
     pygame.display.update()
     for pyEvent in pygame.event.get():
         #키가 눌렸을 때
         if pyEvent.type == pygame.KEYUP:
+            if pyEvent.key == pygame.K_UP:
+                RotCheck = Rotation + 1
+                if RotCheck == 4:
+                    RotCheck =0 
+                while (Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) != True):
+                    if Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) == "LeftEr":
+                        x_Arr_ver += 1
+                        Placing_x += 30
+                    elif Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) == "RightEr":
+                        x_Arr_ver -= 1
+                        Placing_x -= 30
+                    elif Check_Rotation(randompick,RotCheck,Placing_x,Placing_y) == "BottomEr":
+                        y_Arr_ver -= 1
+                        Placing_y -= 30
+
+                Rotation += 1
+                if Rotation == 4:
+                    Rotation = 0
             if pyEvent.key == pygame.K_DOWN:
                 Placing_y += 10
                 if Placing_y >= flag:
